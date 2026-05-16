@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My AI journey</title>
+  <style>
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #f7fafd;
+  color: #003A70;
+  margin: 0;
+  padding: 0;
+}
+
+/* 侧边导航栏 */
+.sidebar-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 85px;
+  max-height: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  border: 2px solid #003A70;
+  box-shadow: 0 8px 32px rgba(0,58,112,0.2);
+  padding: 1rem 0;
+  z-index: 1000;
+  box-sizing: border-box;
+  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-title {
+  color: #003A70;
+  font-size: 0.75rem;
+  font-weight: bold;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  border-top: 2px solid #e6f0fa;
+  padding-top: 1rem;
+}
+
+.nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  color: #003A70;
+  text-decoration: none;
+  width: 100%;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.nav-link-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e6f0fa;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.nav-link-label {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #003A70;
+  text-align: center;
+  white-space: nowrap;
+  min-width: 30px;
+}
+
+.nav-link:hover .nav-link-dot {
+  background: #b3d1ea;
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0,58,112,0.2);
+}
+
+.nav-link:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 100%;
+  margin-left: 12px;
+  background: rgba(0,58,112,0.95);
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 1001;
+  pointer-events: none;
+  font-weight: normal;
+}
+
+.nav-link.active .nav-link-dot {
+  background: #003A70;
+  border-color: #ff6b6b;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(0,58,112,0.3);
+}
+
+
+
+.main-header {
+  background: #003A70;
+  color: #fff;
+  padding: 2.5rem 1rem 1.5rem 1rem;
+  text-align: center;
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+  box-shadow: 0 4px 16px rgba(0,58,112,0.08);
+  margin-left: 160px;
+}
+
+.main-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.5rem;
+  letter-spacing: 2px;
+}
+
+.main-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  color: #b3d1ea;
+}
+
+main {
+  max-width: 100%;
+  margin: 0;
+  margin-left: 160px;
+  padding: 0;
+  width: calc(100% - 160px);
+  box-sizing: border-box;
+}
+
+/* 路线图样式 */
+.route-map-container {
+  width: 90%;
+  max-width: 1400px;
+  margin: 1.5rem 0 2rem 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+#route-map {
+  cursor: pointer;
+  user-select: none;
+  background: #f7fafd;
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,58,112,0.06);
+  overflow: visible;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+#route-map path {
+  stroke-dasharray: 24,20;
+  stroke: #003A70;
+  stroke-width: 4;
+}
+
+#route-map circle,
+#route-map rect,
+#route-map polygon {
+  transition: fill 0.3s, stroke 0.3s, filter 0.3s;
+  filter: drop-shadow(0 2px 6px #003A7012);
+}
+
+#route-map circle:hover,
+#route-map rect:hover,
+#route-map polygon:hover {
+  filter: drop-shadow(0 0 12px #003A70aa);
+  stroke: #1a6ed8;
+  fill: #b3d1ea;
+}
+
+#route-map text {
+  pointer-events: none;
+  font-family: inherit;
+  font-weight: bold;
+}
+
+/* 起点4卡片样式 */
+.start-cards {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  margin: 1.5rem 0 2.5rem 160px;
+  width: 90%;
+  max-width: 1400px;
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  padding: 0 1rem;
+}
+
+.start-card {
+  background: #fff;
+  border-radius: 1.3rem;
+  box-shadow: 0 8px 32px 0 rgba(0,58,112,0.18), 0 1.5px 6px 0 rgba(0,58,112,0.10);
+  padding: 1.5rem 1.6rem 1.2rem 1.6rem;
+  width: 260px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: none;
+}
+
+.start-card:hover {
+  box-shadow: 0 16px 48px 0 rgba(0,58,112,0.22), 0 2px 8px 0 rgba(0,58,112,0.13);
+  transform: translateY(-8px);
+}
+
+.card-title {
+  color: #003A70;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+}
+
+.card-desc {
+  color: #2d5c8a;
+  font-size: 1.02rem;
+  line-height: 1.8;
+  flex: 1;
+}
+
+.lookout-cards {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  margin: 2rem auto 2.5rem auto;
+  max-width: 1400px;
+  width: 90%;
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+}
+
+.lookout-card {
+  background: #fff;
+  border-radius: 1.3rem;
+  box-shadow: 0 8px 32px 0 rgba(0,58,112,0.18), 0 1.5px 6px 0 rgba(0,58,112,0.10);
+  padding: 1.5rem 1.6rem 1.2rem 1.6rem;
+  flex: 1;
+  min-width: 280px;
+  max-width: 360px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: none;
+}
+
+.lookout-card:hover {
+  box-shadow: 0 16px 48px 0 rgba(0,58,112,0.22), 0 2px 8px 0 rgba(0,58,112,0.13);
+  transform: translateY(-8px);
+}
+
+.lookout-card .card-title {
+  color: #003A70;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+}
+
+.lookout-card p {
+  color: #2d5c8a;
+  font-size: 1.02rem;
+  line-height: 1.8;
+  flex: 1;
+  margin: 0;
+}
+
+.journey-cards {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 2rem;
+  margin: 2rem auto;
+  max-width: 1400px;
+  width: 90%;
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.next-station-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+  margin-top: 1.5rem;
+}
+
+.next-station-column h4 {
+  margin: 0 0 0.8rem 0;
+  color: #003A70;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+}
+
+.next-station-column .journey-cards {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+}
+
+.next-station-column .journey-card {
+  min-width: 0;
+  max-width: 520px;
+}
+
+.journey-card {
+  background: #fff;
+  border-radius: 1.3rem;
+  box-shadow: 0 8px 32px 0 rgba(0,58,112,0.18), 0 1.5px 6px 0 rgba(0,58,112,0.10);
+  padding: 1.5rem 1.6rem 1.2rem 1.6rem;
+  flex: 1;
+  min-width: 280px;
+  max-width: 420px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: none;
+}
+
+.journey-card:hover {
+  box-shadow: 0 16px 48px 0 rgba(0,58,112,0.22), 0 2px 8px 0 rgba(0,58,112,0.13);
+  transform: translateY(-8px);
+}
+
+.journey-card .card-title {
+  color: #003A70;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+}
+
+.journey-card p {
+  color: #2d5c8a;
+  font-size: 1rem;
+  line-height: 1.8;
+  flex: 1;
+  margin: 0;
+}
+
+.section-intro,
+.section-outro {
+  color: #2d5c8a;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin: 1.5rem 0;
+  font-style: italic;
+}
+
+.journey-section {
+  background: #fff;
+  border-left: 6px solid #003A70;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem;
+  max-width: 1400px;
+  width: 90%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0,58,112,0.06);
+}
+
+.summary-section {
+  background: transparent;
+  border-left: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.summary-section h3 {
+  text-align: center;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  display: block;
+}
+
+.journey-section h3 {
+  margin-top: 0;
+  color: #003A70;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summary-section h3 {
+  text-align: center;
+  font-size: 2rem;
+  letter-spacing: 1px;
+  display: block;
+}
+
+/* Tab 导航和内容布局 */
+.station-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 1.5rem;
+  width: 100%;
+  background: #f7fafd;
+  border: 1px solid #e6f0fa;
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
+
+.station-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 2px solid #b3d1ea;
+  padding: 0;
+  background: #f0f6fc;
+}
+
+.tab-button {
+  flex: 1;
+  min-width: 120px;
+  padding: 1.2rem 1rem;
+  border: none;
+  background: transparent;
+  color: #003A70;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tab-button:hover {
+  background: rgba(179, 209, 234, 0.3);
+  color: #003A70;
+}
+
+.tab-button.active {
+  background: #fff;
+  color: #003A70;
+  border-bottom-color: #003A70;
+}
+
+.tab-content {
+  display: none;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.station-column {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+.station-column h4 {
+  display: none;
+}
+
+.station-images {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.image-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-caption {
+  color: #003A70;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.8rem 0;
+  line-height: 1.5;
+}
+
+.station-images img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.6rem;
+  border: 1px solid #d0e0f0;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,58,112,0.08);
+}
+
+.station-column p {
+  color: #2d5c8a;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0.8rem 0;
+}
+
+.station-column p strong {
+  color: #003A70;
+  font-weight: bold;
+}
+
+.time {
+  background: #e6f0fa;
+  color: #003A70;
+  border-radius: 1em;
+  padding: 0.2em 0.8em;
+  font-size: 0.95em;
+  margin-left: 1em;
+}
+
+ul {
+  margin: 1em 0 0 1.2em;
+  padding: 0;
+  color: #003A70;
+}
+
+li {
+  margin-bottom: 0.7em;
+  line-height: 1.7;
+}
+
+.station {
+  margin-bottom: 1.2em;
+  padding-left: 0.5em;
+}
+
+.transition {
+  color: #2d5c8a;
+  font-style: italic;
+  margin: 1em 0 1em 0.5em;
+}
+
+.main-footer {
+  background: #003A70;
+  color: #fff;
+  text-align: center;
+  padding: 1.2rem 0 1rem 0;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  margin-top: 3rem;
+  margin-left: 160px;
+  width: calc(100% - 160px);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .start-cards {
+    gap: 1rem;
+    width: 90%;
+    max-width: 1400px;
+    margin-left: 160px;
+    flex-wrap: wrap;
+  }
+  .start-card {
+    width: calc(50% - 1rem);
+    min-width: 220px;
+  }
+  
+  .tab-button {
+    font-size: 0.85rem;
+    min-width: 100px;
+    padding: 1rem 0.8rem;
+  }
+  
+  .tab-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar-nav {
+    left: 20px;
+    width: 45px;
+  }
+  
+  .main-header {
+    margin-left: 110px;
+  }
+  
+  main {
+    margin-left: 110px;
+    width: calc(100% - 110px);
+  }
+  
+  .main-footer {
+    margin-left: 110px;
+    width: calc(100% - 110px);
+  }
+  
+  .route-map-container {
+    margin-left: 110px;
+    width: 90%;
+    max-width: 1400px;
+  }
+  
+  .start-cards {
+    gap: 0.8rem;
+    margin: 1rem 0 1.5rem 110px;
+    width: 90%;
+    max-width: 1400px;
+  }
+  
+  .main-header h1 {
+    font-size: 1.5rem;
+  }
+  .main-header h2 {
+    font-size: 1rem;
+  }
+  main {
+    padding: 0 0.5rem;
+  }
+  .journey-section {
+    padding: 1rem 0.7rem 1rem 1rem;
+  }
+
+  .tab-button {
+    flex: 1;
+    min-width: 80px;
+    font-size: 0.75rem;
+    padding: 0.8rem 0.5rem;
+  }
+  
+  .tab-content {
+    padding: 1rem;
+  }
+  
+  .carousel-dots {
+    gap: 0.5rem;
+  }
+  
+  .dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  .start-card {
+    width: 100%;
+    min-height: auto;
+    padding: 1rem 0.8rem 1rem 0.8rem;
+  }
+}
+
+/* Carousel styles */
+.carousel-container {
+  width: 100%;
+  margin-bottom: 1.2rem;
+  max-width: 100%;
+  height: 700px;
+  min-height: 600px;
+  position: relative;
+  background: #fff;
+  border-radius: 0.6rem;
+  box-shadow: 0 2px 8px rgba(0,58,112,0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.carousel-track {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.6rem;
+}
+
+.carousel-item {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #b3d1ea #f7fafd;
+}
+
+.carousel-item.active {
+  display: flex;
+  opacity: 1;
+}
+
+.carousel-item .image-caption {
+  color: #003A70;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.8rem 0;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.carousel-item img {
+  max-width: 100%;
+  max-height: 500px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.4rem;
+  border: 1px solid #d0e0f0;
+  box-shadow: 0 2px 8px rgba(0,58,112,0.08);
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 0;
+  background: #f0f6fc;
+  border-top: 1px solid #e6f0fa;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e6f0fa;
+  border: 2px solid #b3d1ea;
+  color: #003A70;
+  font-weight: bold;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.dot:hover {
+  background: #b3d1ea;
+  transform: scale(1.1);
+}
+
+.dot.active {
+  background: #003A70;
+  color: #fff;
+  border-color: #003A70;
+  transform: scale(1.15);
+}
+
+.reflection-cards {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.5rem auto;
+  width: 90%;
+  max-width: 900px;
+}
+
+.reflection-card {
+  background: #fff;
+  border-radius: 1.3rem;
+  box-shadow: 0 8px 32px 0 rgba(0,58,112,0.18), 0 1.5px 6px 0 rgba(0,58,112,0.10);
+  padding: 1.5rem 1.6rem 1.2rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: none;
+}
+
+.reflection-card:hover {
+  box-shadow: 0 16px 48px 0 rgba(0,58,112,0.22), 0 2px 8px 0 rgba(0,58,112,0.13);
+  transform: translateY(-8px);
+}
+
+.reflection-card .card-title {
+  color: #003A70;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+}
+
+.reflection-card p {
+  color: #2d5c8a;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+  .carousel-container {
+    height: 380px;
+    min-height: 330px;
+  }
+  
+  .carousel-item img {
+    max-height: 250px;
+  }
+  
+  .dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+</head>
+<body>
+  <!-- 侧边导航栏 -->
+  <nav class="sidebar-nav">
+    <div class="nav-title">My AI Journey</div>
+    <ul class="nav-list">
+      <li><a href="#" class="nav-link" data-label="Start" onclick="scrollToElement(event, 'start-cards')"><div class="nav-link-dot"></div><div class="nav-link-label">Start</div></a></li>
+      <li><a href="#station1" class="nav-link" data-label="Station 1"><div class="nav-link-dot"></div><div class="nav-link-label">S1</div></a></li>
+      <li><a href="#station2" class="nav-link" data-label="Station 2"><div class="nav-link-dot"></div><div class="nav-link-label">S2</div></a></li>
+      <li><a href="#station3" class="nav-link" data-label="Station 3"><div class="nav-link-dot"></div><div class="nav-link-label">S3</div></a></li>
+      <li><a href="#lookout" class="nav-link" data-label="Gas station"><div class="nav-link-dot"></div><div class="nav-link-label">Gas</div></a></li>
+      <li><a href="#new-journey" class="nav-link" data-label="Next Station"><div class="nav-link-dot"></div><div class="nav-link-label">Next</div></a></li>
+    </ul>
+  </nav>
+
+  <header class="main-header">
+    <h1>My AI Journey</h1>
+    <h2>The trigger of my MBA journey</h2>
+    <p class="subtitle">LBS MBA Application</p>
+  </header>
+  <!-- 路线图 -->
+  <div class="route-map-container">
+    <svg id="route-map" width="1350" height="360" viewBox="0 0 1350 360" style="display:block;margin:0 auto;">
+      <!-- 平滑弯曲路线（贝塞尔曲线） -->
+      <path id="route-path" d="M105,240 C225,80 375,80 525,240 S825,400 975,240 S1125,80 1245,240" fill="none" stroke="#003A70" stroke-width="4" stroke-dasharray="24,20"/>
+      <!-- 飞机节点 -->
+      <circle id="plane" r="32" fill="#fff" stroke="#003A70" stroke-width="6"/>
+      <!-- 起点节点 -->
+      <circle id="route-start" cx="105" cy="240" r="36" fill="#fff" stroke="#003A70" stroke-width="8"/>
+      <text x="105" y="310" text-anchor="middle" fill="#003A70" font-size="32">Start</text>
+      <!-- 站点1 -->
+      <circle id="route-station1" cx="225" cy="120" r="24" fill="#fff" stroke="#003A70" stroke-width="6"/>
+      <text x="225" y="80" text-anchor="middle" fill="#003A70" font-size="28">Station 1</text>
+      <!-- 站点2 -->
+      <circle id="route-station2" cx="375" cy="120" r="24" fill="#fff" stroke="#003A70" stroke-width="6"/>
+      <text x="375" y="80" text-anchor="middle" fill="#003A70" font-size="28">Station 2</text>
+      <!-- 站点3 -->
+      <circle id="route-station3" cx="525" cy="240" r="24" fill="#fff" stroke="#003A70" stroke-width="6"/>
+      <text x="525" y="310" text-anchor="middle" fill="#003A70" font-size="28">Station 3</text>
+      <!-- 加油站（瞭望台） -->
+      <rect id="route-lookout" x="975" y="226" width="40" height="40" rx="14" fill="#fff" stroke="#003A70" stroke-width="6"/>
+      <text x="1003" y="200" text-anchor="middle" fill="#003A70" font-size="28">Gas station</text>
+      <!-- 下一站 -->
+      <circle id="route-new-journey" cx="1245" cy="240" r="24" fill="#fff" stroke="#003A70" stroke-width="6"/>
+      <text x="1245" y="310" text-anchor="middle" fill="#003A70" font-size="28">Next station</text>
+    </svg>
+  </div>
+
+  <!-- 起点4卡片 -->
+  <div class="start-cards" id="start-cards">
+    <div class="start-card">
+      <div class="card-title">Knowledge of Painpoints</div>
+      <div class="card-desc">- 2+years of working experience in compliance team.</div>
+    </div>
+    <div class="start-card">
+      <div class="card-title">Technical Background</div>
+      <div class="card-desc">- Took Python courses in university.</div>
+      <div class="card-desc">- Low-code tool application experience during internship.</div>
+    </div>
+    <div class="start-card">
+      <div class="card-title">Passion for Innovation</div>
+      <div class="card-desc">- The first one to come up with the tool application senarios in teams.</div>
+      <div class="card-desc">- Patient to run tests for 100+ times.</div>
+    </div>
+    <div class="start-card">
+      <div class="card-title">AI Strategy of company</div>
+      <div class="card-desc">- Selected as the AI representative of department to join company AI campaign.</div>
+    </div>
+  </div>
+
+  <main>
+    <section class="journey-section" id="station1">
+      <h3>Station 1: Monthly Statement Audit AI Tool</h3>
+      <div class="station-grid">
+        <!-- Tab Navigation -->
+        <div class="station-tabs">
+          <button class="tab-button active" onclick="switchTab(event, 'station1-challenges')">Pain Points</button>
+          <button class="tab-button" onclick="switchTab(event, 'station1-results')">Solutions</button>
+          <button class="tab-button" onclick="switchTab(event, 'station1-challenge')">The Biggest Challenge</button>
+          <button class="tab-button" onclick="switchTab(event, 'station1-reflection')">Key Reflection</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content active" id="station1-challenges">
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <div class="carousel-item active">
+                <p class="image-caption">Complex personal account dealing application process. Staff needs to print the form, fill in the information, sign, scan and send to our email box.</p>
+                <img src="images/01_1.png" alt="现状痛点1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Manually review of 200+ monthly statements per quarter, taking up to 1 month.</p>
+                <img src="images/02_1.png" alt="现状痛点1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Complex statement structures increase the risk of overlooking transactions during review and add unnecessary review burden.</p>
+                <img src="images/03_2.png" alt="现状痛点2">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Delayed violation detection and warnings due to high workload.</p>
+                <img src="images/04_3.png" alt="现状痛点3">
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="changeSlide(this)">1</span>
+              <span class="dot" onclick="changeSlide(this)">2</span>
+              <span class="dot" onclick="changeSlide(this)">3</span>
+              <span class="dot" onclick="changeSlide(this)">4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="station1-results">
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <div class="carousel-item active">
+                <p class="image-caption">Personal account dealing application can be submitted electronically with a few clicks. Company-wide adoption.</p>
+                <img src="images/05_2.png" alt="达成效果2">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Automatically generate reply emails and provide a task list panel to track application status.</p>
+                <img src="images/06_3.png" alt="达成效果3">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Automated trades information extraction and AI-driven violation detection. Review time reduced from 1 month to 1 week.</p>
+                <img src="images/07_1.png" alt="达成效果1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Visualization dashboards for identifying suspicious trading patterns.</p>
+                <img src="images/08_4.png" alt="达成效果4">
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="changeSlide(this)">1</span>
+              <span class="dot" onclick="changeSlide(this)">2</span>
+              <span class="dot" onclick="changeSlide(this)">3</span>
+              <span class="dot" onclick="changeSlide(this)">4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="station1-challenge">
+          <p><strong>Challenge:</strong> Many handwritten scanned documents couldn't be processed directly.</p>
+          <p><strong>Solution:</strong> Collaborate with IT specialists to first use AI to recognize handwritten content, then organize and structure the identified information via automated programs.</p>
+          <div class="station-images">
+            <img src="images/09_image.png" alt="设计方案">
+          </div>
+        </div>
+
+        <div class="tab-content" id="station1-reflection">
+          <div class="reflection-cards">
+            <div class="reflection-card">
+              <div class="card-title">1. Dream big and dare to fail</div>
+              <p>Problems that seem unsolvable often reveal solutions through persistent effort. Proactive exploration is the key.</p>
+            </div>
+            <div class="reflection-card">
+              <div class="card-title">2. No shame in asking for advice</div>
+              <p>Consulting IT experts led to the AI solution. Recognizing when to seek professional help is crucial alongside independent thinking.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="journey-section" id="station2">
+      <h3>Station 2: Marketing material Review AI Tool</h3>
+      <div class="station-grid">
+        <!-- Tab Navigation -->
+        <div class="station-tabs">
+          <button class="tab-button active" onclick="switchTab(event, 'station2-challenges')">Pain Points</button>
+          <button class="tab-button" onclick="switchTab(event, 'station2-results')">Solutions</button>
+          <button class="tab-button" onclick="switchTab(event, 'station2-challenge')">The Biggest Challenge</button>
+          <button class="tab-button" onclick="switchTab(event, 'station2-reflection')">Key Reflection</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content active" id="station2-challenges">
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <div class="carousel-item active">
+                <p class="image-caption">Review 100+ fund monthly newsletters within one week - heavy workload.</p>
+                <img src="images/10_Current_Challenge_1.png" alt="Current Challenge 1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Complex fund reports create risk of missing potential compliance issues.</p>
+                <img src="images/11_Current_Challenge_2.png" alt="Current Challenge 2">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">17 regulatory requirements from Securities and Futures Commission easily missed during manual review.</p>
+                <img src="images/12_Current_Challenge_3.png" alt="Current Challenge 3">
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="changeSlide(this)">1</span>
+              <span class="dot" onclick="changeSlide(this)">2</span>
+              <span class="dot" onclick="changeSlide(this)">3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="station2-results">
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <div class="carousel-item active">
+                <p class="image-caption">AI reviews documents and provides amendment recommendations, 80% efficiency increase, sustainable rule iteration.</p>
+                <img src="images/13_Solutions_1.png" alt="Solutions 1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">AI integrates Securities and Futures Commission rules with ability to manually update, supporting evolving regulations.</p>
+                <img src="images/14_Solutions_2.png" alt="Solutions 2">
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="changeSlide(this)">1</span>
+              <span class="dot" onclick="changeSlide(this)">2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="station2-challenge">
+          <p><strong>Challenge:</strong> Initial low trust in AI tool from other team members.</p>
+          <p><strong>Solution:</strong> Collect feedback via the task panel and conduct system optimization to continuously improve applicability.</p>
+          <div class="station-images">
+            <img src="images/15_image.png" alt="设计方案">
+          </div>
+        </div>
+
+        <div class="tab-content" id="station2-reflection">
+          <div class="reflection-cards">
+            <div class="reflection-card">
+              <div class="card-title">1. Systematic Thinking</div>
+              <p>When designing solutions, we need to think dynamically and long-term, and build in sufficient flexibility so that the solution can adapt and evolve over time.</p>
+            </div>
+            <div class="reflection-card">
+              <div class="card-title">2. Put ourselves in others' shoes</div>
+              <p>If someone doesn’t act as we expect, there may be hidden difficulties we are unaware of. In such cases, we should communicate proactively and work together to find solutions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey-section" id="station3">
+      <h3>Station 3: Agreement Generation AI Tool</h3>
+      <div class="station-grid">
+        <!-- Tab Navigation -->
+        <div class="station-tabs">
+          <button class="tab-button active" onclick="switchTab(event, 'station3-challenges')">Pain Points</button>
+          <button class="tab-button" onclick="switchTab(event, 'station3-results')">Solutions</button>
+          <button class="tab-button" onclick="switchTab(event, 'station3-challenge')">The Biggest Challenge</button>
+          <button class="tab-button" onclick="switchTab(event, 'station3-reflection')">Key Reflection</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content active" id="station3-challenges">
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <div class="carousel-item active">
+                <p class="image-caption">Standardized contract templates are lengthy; drafting a contract takes 30 minutes and carries a risk of typos.</p>
+                <img src="images/16_Challenge_1.png" alt="Challenge 1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Manual maintenance of contract logs with over 2,000 entries carries risks of omissions and errors in updates.</p>
+                <img src="images/17_Challenge_2.png" alt="Challenge 2">
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="changeSlide(this)">1</span>
+              <span class="dot" onclick="changeSlide(this)">2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="station3-results">
+          <div class="carousel-container">
+            <div class="carousel-track">
+              <div class="carousel-item active">
+                <p class="image-caption">Standard contracts can be generated in just 3 seconds with a few clicks, eliminating typos entirely.</p>
+                <img src="images/18_Result_1.png" alt="Result 1">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Automatic Agreement tracking eliminates manual log maintenance needs.</p>
+                <img src="images/19_Result_2.png" alt="Result 2">
+              </div>
+              <div class="carousel-item">
+                <p class="image-caption">Online Agreement query and sharing improves cross-department communication.</p>
+                <img src="images/20_Result_3.png" alt="Result 3">
+              </div>
+            </div>
+            <div class="carousel-dots">
+              <span class="dot active" onclick="changeSlide(this)">1</span>
+              <span class="dot" onclick="changeSlide(this)">2</span>
+              <span class="dot" onclick="changeSlide(this)">3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="station3-challenge">
+          <p><strong>Challenge:</strong> Many different agreement template, inconsistant records across team members. Confusion were caused when the agreement generated is defferent from others' template.</p>
+          <p><strong>Solutions:</strong> Sorted out the template for each scenario and obtain written confirmation from head of the team.</p>
+          <div class="station-images">
+            <img src="images/21_Agreement_challenge.png" alt="Agreement challenge">
+          </div>
+        </div>
+
+        <div class="tab-content" id="station3-reflection">
+          <div class="reflection-cards">
+            <div class="reflection-card">
+              <div class="card-title">1. Keep everyone on the same page</div>
+              <p>It’s crucial to communicate and verify information with all parties in a timely manner. A single mistake at an early stage can lead to a chain of errors.</p>
+            </div>
+            <div class="reflection-card">
+              <div class="card-title">2. Create shared ownership</div>
+              <p>Working alone isn’t necessarily a sign of strength or capability. Getting everyone involved—that’s what’s truly impressive.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="journey-section" id="lookout">
+      <h3>Gas Station: My takeaways</h3>
+      <div class="lookout-cards">
+        <div class="lookout-card">
+          <div class="card-title">Leadership</div>
+          <p>Learned to mobilize team effort through clear task allocation and motivation, significantly boosting team efficiency.</p>
+        </div>
+        <div class="lookout-card">
+          <div class="card-title">Innovation</div>
+          <p>Developed ability to design solutions for real business problems and apply AI to automate and optimize complex processes.</p>
+        </div>
+        <div class="lookout-card">
+          <div class="card-title">Resilience</div>
+          <p>Persistence through challenges to build reliable tools. Tested single functions 100+ times to achieve product excellence.</p>
+        </div>
+      </div>
+    </section>
+    <section class="journey-section" id="new-journey">
+      <h3>Next Station</h3>
+      <div class="next-station-grid">
+        <div class="next-station-column">
+          <h4>Empowering LBS</h4>
+          <div class="journey-cards">
+            <div class="journey-card">
+              <div class="card-title">Class project Empowerment</div>
+              <p>Integrate AI tool development insights into business case analysis and solution design, enhancing classroom projects' efficiency and innovation. Share practical experiences in team collaboration and problem-solving.</p>
+            </div>
+            <div class="journey-card">
+              <div class="card-title">Club Empowerment</div>
+              <p>Share AI tool development expertise to help clubs design AI-assisted tools, enriching activities and operational efficiency. Foster member understanding and application of AI technology.</p>
+            </div>
+          </div>
+          <h4>Facilitate Career Development - Fintech+Consulting</h4>
+          <div class="journey-cards">
+            <div class="journey-card">
+              <div class="card-title">Technical Implementation Experience</div>
+              <p>I have been involved in the complete process from requirements to deployment, enabling me to pragmatically evaluate project timelines, resource needs, and risks, thereby avoiding consulting solutions that are merely theoretical.</p>
+            </div>
+            <div class="journey-card">
+              <div class="card-title">Process Automation Insight</div>
+              <p>AI tools often focus on automating repetitive tasks. I can help financial institutions optimize operational workflows to reduce costs and enhance efficiency.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="journey-section summary-section" id="summary">
+      <h3>Dare to learn, dare to act</h3>
+    </section>
+  </main>
+  <footer class="main-footer">
+    <p>© 2026 LBS MBA Application | Thank you!</p>
+  </footer>
+  <script src="route-map.js"></script>
+  <script>
+    // Tab切换功能
+    function switchTab(event, tabId) {
+      event.preventDefault();
+      
+      // 获取被点击按钮的父容器station-grid
+      const button = event.target;
+      const stationGrid = button.closest('.station-grid');
+      
+      if (!stationGrid) return;
+      
+      // 移除所有tab-button的active类
+      const allButtons = stationGrid.querySelectorAll('.tab-button');
+      allButtons.forEach(btn => btn.classList.remove('active'));
+      
+      // 隐藏所有tab-content
+      const allContents = stationGrid.querySelectorAll('.tab-content');
+      allContents.forEach(content => content.classList.remove('active'));
+      
+      // 激活被点击的按钮
+      button.classList.add('active');
+      
+      // 显示对应的tab-content
+      const targetContent = stationGrid.querySelector(`#${tabId}`);
+      if (targetContent) {
+        targetContent.classList.add('active');
+      }
+    }
+
+    // 轮播功能
+    function changeSlide(dotElement) {
+      // 找到最近的carousel-container
+      const carousel = dotElement.closest('.carousel-container');
+      if (!carousel) return;
+
+      // 获取所有的dots和slides
+      const dots = carousel.querySelectorAll('.dot');
+      const items = carousel.querySelectorAll('.carousel-item');
+      
+      // 找到被点击的dot的索引
+      const clickedIndex = Array.from(dots).indexOf(dotElement);
+      
+      // 移除所有active类
+      dots.forEach(dot => dot.classList.remove('active'));
+      items.forEach(item => item.classList.remove('active'));
+      
+      // 添加active类到点击的dot和对应的slide
+      dotElement.classList.add('active');
+      items[clickedIndex].classList.add('active');
+    }
+
+    // 处理起点的平滑滚动
+    function scrollToElement(event, elementId) {
+      event.preventDefault();
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // 动画飞机沿路径移动
+    document.addEventListener('DOMContentLoaded', function () {
+      const path = document.getElementById('route-path');
+      const plane = document.getElementById('plane');
+      if (!path || !plane) return;
+      const pathLength = path.getTotalLength();
+      let progress = 0;
+      function animatePlane() {
+        progress += 0.005;
+        if (progress > 1) progress = 0;
+        const point = path.getPointAtLength(progress * pathLength);
+        plane.setAttribute('cx', point.x);
+        plane.setAttribute('cy', point.y);
+        requestAnimationFrame(animatePlane);
+      }
+      animatePlane();
+
+      // 处理导航栏active状态
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = ['start-cards', 'station1', 'station2', 'station3', 'lookout', 'new-journey'];
+      
+      window.addEventListener('scroll', function () {
+        let currentSection = '';
+        for (let section of sections) {
+          const element = document.getElementById(section);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            if (rect.top <= 200) {
+              currentSection = section;
+            }
+          }
+        }
+        
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          const href = link.getAttribute('href');
+          const targetId = href.substring(1);
+          if (targetId === currentSection) {
+            link.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
